@@ -1,10 +1,10 @@
 """
-SQL Server Data Collector for LME Metal Spreads
-Version: 1.0
+SQL Server Data Collector for LME Metal Spreads (JCL Database Version)
+Version: 3.0
 Date: 2025-07-18
 
 This module provides the SQLServerDataCollector class for collecting
-market data from Bloomberg and storing it in SQL Server.
+market data from Bloomberg and storing it in JCL database with LME schemas.
 """
 
 import pyodbc
@@ -18,8 +18,8 @@ from pathlib import Path
 import time
 
 
-class SQLServerDataCollector:
-    """Collects LME metal spread data from Bloomberg and stores in SQL Server"""
+class SQLServerDataCollectorJCL:
+    """Collects LME metal spread data from Bloomberg and stores in JCL database"""
     
     def __init__(self, config_path: str = "config.json"):
         """Initialize collector with configuration"""
@@ -29,6 +29,9 @@ class SQLServerDataCollector:
         self.refdata_service = None
         self.instrument_service = None
         self.logger = self._setup_logging()
+        
+        # Schema prefix for JCL database
+        self.schema_prefix = self.config.get('database', {}).get('schema_prefix', 'lme_')
         
         # Metal codes mapping
         self.metal_configs = {
@@ -49,11 +52,11 @@ class SQLServerDataCollector:
         """Setup logging configuration"""
         log_config = self.config.get('logging', {})
         
-        logger = logging.getLogger('SQLDataCollector')
+        logger = logging.getLogger('LMEDataCollectorJCL')
         logger.setLevel(getattr(logging, log_config.get('level', 'INFO')))
         
         # Create logs directory if it doesn't exist
-        log_file = log_config.get('file', 'logs/collector.log')
+        log_file = log_config.get('file', 'logs/lme_collector.log')
         Path(log_file).parent.mkdir(exist_ok=True)
         
         # File handler with rotation
@@ -106,7 +109,7 @@ class SQLServerDataCollector:
             )
             self.connection.timeout = db_config.get('query_timeout', 300)
             
-            self.logger.info("Successfully connected to SQL Server")
+            self.logger.info(f"Successfully connected to JCL database")
             return True
             
         except Exception as e:
@@ -264,7 +267,7 @@ class SQLServerDataCollector:
             for spread in spreads:
                 cursor.execute("""
                     DECLARE @spread_id INT;
-                    EXEC market.sp_UpsertSpread 
+                    EXEC lme_market.sp_UpsertSpread 
                         @metal_code = ?,
                         @ticker = ?,
                         @spread_type = ?,
@@ -390,7 +393,7 @@ class SQLServerDataCollector:
                     todays_volume = 0
                     
                 cursor.execute("""
-                    EXEC market.sp_InsertTickData
+                    EXEC lme_market.sp_InsertTickData
                         @spread_id = ?,
                         @timestamp = ?,
                         @bid = ?,
@@ -449,9 +452,9 @@ class SQLServerDataCollector:
                     s.ticker,
                     s.spread_type,
                     s.description
-                FROM market.M_spreads s
-                JOIN config.M_metals m ON s.metal_id = m.metal_id
-                JOIN market.T_tick_data t ON s.spread_id = t.spread_id
+                FROM lme_market.LME_M_spreads s
+                JOIN lme_config.LME_M_metals m ON s.metal_id = m.metal_id
+                JOIN lme_market.LME_T_tick_data t ON s.spread_id = t.spread_id
                 WHERE m.metal_code = ?
                 AND t.timestamp > DATEADD(HOUR, -?, GETDATE())
                 AND (t.bid IS NOT NULL OR t.ask IS NOT NULL)
@@ -479,10 +482,10 @@ class SQLServerDataCollector:
         
         try:
             cursor.execute("""
-                UPDATE config.M_collection_config
+                UPDATE lme_config.LME_M_collection_config
                 SET last_run = GETDATE(),
                     next_run = DATEADD(MINUTE, interval_minutes, GETDATE())
-                WHERE metal_id = (SELECT metal_id FROM config.M_metals WHERE metal_code = ?)
+                WHERE metal_id = (SELECT metal_id FROM lme_config.LME_M_metals WHERE metal_code = ?)
                 AND collection_type = ?
             """, (metal_code, collection_type))
             
@@ -507,8 +510,8 @@ class SQLServerDataCollector:
             
 
 def main():
-    """Example usage of SQLServerDataCollector"""
-    collector = SQLServerDataCollector()
+    """Example usage of SQLServerDataCollectorJCL"""
+    collector = SQLServerDataCollectorJCL("config.jcl.json")
     
     try:
         # Connect to database and Bloomberg

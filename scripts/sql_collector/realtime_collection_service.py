@@ -76,8 +76,8 @@ class RealtimeCollectionService:
                     cc.interval_minutes,
                     cc.last_run,
                     cc.next_run
-                FROM config.collection_config cc
-                JOIN config.metals m ON cc.metal_id = m.metal_id
+                FROM config.M_collection_config cc
+                JOIN config.M_metals m ON cc.metal_id = m.metal_id
                 WHERE cc.is_active = 1 AND m.is_active = 1
             """)
             
@@ -211,8 +211,8 @@ class RealtimeCollectionService:
             # Get all active spreads
             cursor.execute("""
                 SELECT spread_id, ticker, spread_type, description
-                FROM market.spreads s
-                JOIN config.metals m ON s.metal_id = m.metal_id
+                FROM market.M_spreads s
+                JOIN config.M_metals m ON s.metal_id = m.metal_id
                 WHERE m.metal_code = ? AND s.is_active = 1
             """, (metal_code,))
             
@@ -286,7 +286,7 @@ class RealtimeCollectionService:
             cursor.execute("""
                 EXEC market.sp_CalculateDailySummary 
                     @trading_date = NULL,
-                    @metal_id = (SELECT metal_id FROM config.metals WHERE metal_code = ?)
+                    @metal_id = (SELECT metal_id FROM config.M_metals WHERE metal_code = ?)
             """, (metal_code,))
             
             result = cursor.fetchone()
@@ -312,13 +312,13 @@ class RealtimeCollectionService:
                 UPDATE s
                 SET s.is_active = 0,
                     s.updated_at = GETDATE()
-                FROM market.spreads s
-                JOIN config.metals m ON s.metal_id = m.metal_id
+                FROM market.M_spreads s
+                JOIN config.M_metals m ON s.metal_id = m.metal_id
                 WHERE m.metal_code = ?
                 AND s.is_active = 1
                 AND NOT EXISTS (
                     SELECT 1 
-                    FROM market.tick_data t 
+                    FROM market.T_tick_data t 
                     WHERE t.spread_id = s.spread_id 
                     AND t.timestamp > DATEADD(DAY, -30, GETDATE())
                 )
