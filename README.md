@@ -1,13 +1,32 @@
-# LME Copper Spread Analysis Tools
+# LME Metal Spread Analysis Tools
 
-LME（ロンドン金属取引所）銅スプレッドの分析・取得ツール集です。Bloomberg APIを使用して、アクティブなスプレッドの検索、満期日の表示、当日の取引データの取得などを行います。
+LME（ロンドン金属取引所）金属スプレッドの分析・取得ツール集です。Bloomberg APIを使用して、アクティブなスプレッドの検索、満期日の表示、当日の取引データの取得などを行います。
+
+## 🆕 SQL Serverベースシステム（推奨）
+
+ティックデータの保存とヒストリカル分析に対応した新しいSQL Serverベースのシステムが利用可能です。
+
+### 特徴
+- **複数金属対応**: 銅、アルミニウム、亜鉛、鉛、ニッケル、錫
+- **ティックデータ保存**: 全ての価格更新を時系列で保存
+- **重複防止機能**: データの整合性を自動的に維持
+- **3段階の収集頻度**: リアルタイム（5分）、定期（30分）、日次メンテナンス
+- **ヒストリカル分析**: 過去データの照会と分析が可能
+
+詳細は [SQL Server Setup Guide](docs/sql_design/SQL_SERVER_SETUP.md) を参照してください。
 
 ## 必要な環境
 
-- Python 3.x
+### 基本要件
+- Python 3.8+
 - Bloomberg Terminal（起動済み）
 - blpapi (Bloomberg Python API)
 - pandas
+
+### SQL Serverシステム追加要件
+- SQL Server 2016以降（Express版でも可）
+- pyodbc
+- ODBC Driver 17 for SQL Server
 
 ## フォルダ構成
 
@@ -16,10 +35,19 @@ GetAllSpd/
 ├── scripts/
 │   ├── analysis/          # スプレッド分析スクリプト
 │   ├── market_data/       # 市場データ取得スクリプト
+│   ├── sql_collector/     # SQL Serverデータ収集システム
+│   ├── scheduler/         # スケジューラー
 │   └── debug/             # デバッグ・検証用スクリプト
+├── sql/
+│   ├── schema/            # データベーススキーマ
+│   ├── procedures/        # ストアドプロシージャ
+│   └── views/             # ビュー定義
 ├── data/
 │   ├── csv_results/       # 実行結果のCSVファイル
 │   └── reference/         # 参照用データ
+├── docs/
+│   └── sql_design/        # SQL Server設計ドキュメント
+├── config.example.json    # 設定ファイルサンプル
 └── README.md
 ```
 

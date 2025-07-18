@@ -44,5 +44,6 @@ blpapi/
 
 # Config files with credentials
 config.ini
+config.json
 credentials.json
 *.key
