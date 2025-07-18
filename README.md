@@ -25,7 +25,16 @@ GetAllSpd/
 
 ## 主要スクリプト
 
-### 1. 最終版：満期日付き全アクティブスプレッド取得
+### 1. 最新版：リアルタイムスプレッド検索（推奨）
+```bash
+python scripts/market_data/get_all_spreads_realtime.py
+```
+- **新しいスプレッドの組み合わせも自動検出**
+- CSVファイルに依存せず、毎回最新のスプレッドリストを作成
+- 2,500以上のスプレッドから検索
+- アクティブな板情報のみを表示
+
+### 2. 満期日付き全アクティブスプレッド取得（CSVベース）
 ```bash
 python scripts/market_data/get_all_spreads_with_prompts.py
 ```
@@ -33,8 +42,9 @@ python scripts/market_data/get_all_spreads_with_prompts.py
 - 各スプレッドの正確な満期日（Prompt Date）を2列で表示
 - LMCADS03とLMCADYから実際のLME_PROMPT_DTを取得して使用
 - 当日の出来高は別管理（過去の出来高と混在しない）
+- **注意**: 事前にanalyze_spreads.pyとanalyze_odd_date_spreads.pyの実行が必要
 
-### 2. スプレッド検索・分析
+### 3. スプレッド検索・分析
 
 #### 通常のスプレッド分析
 ```bash
@@ -51,7 +61,7 @@ python scripts/analysis/analyze_odd_date_spreads.py
 - Cash-特定日付スプレッド（例：00-250722）
 - 3M-特定日付スプレッド（例：250722-03）
 
-### 3. 市場データ取得
+### 4. 市場データ取得
 
 #### 当日の出来高を正確に取得
 ```bash
@@ -67,7 +77,7 @@ python scripts/market_data/get_current_market_spreads.py
 - 現在アクティブな板情報を取得
 - Bid/Askスプレッドを計算
 
-### 4. デバッグツール
+### 5. デバッグツール
 
 ```bash
 python scripts/debug/check_prompt_dates.py     # 3M/Cashの満期日確認
@@ -115,9 +125,9 @@ python scripts/debug/debug_single_spread.py    # 特定スプレッドの詳細�
 
 ## 使用例
 
-### 今日取引があったスプレッドを確認
+### 今日取引があったスプレッドを確認（リアルタイム版）
 ```bash
-python scripts/market_data/get_all_spreads_with_prompts.py
+python scripts/market_data/get_all_spreads_realtime.py
 ```
 
 出力例：
