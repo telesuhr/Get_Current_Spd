@@ -1,0 +1,6 @@
+-- Check V_latest_market_data columns
+SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_SCHEMA = 'lme_market' 
+  AND TABLE_NAME = 'V_latest_market_data'
+ORDER BY ORDINAL_POSITION;

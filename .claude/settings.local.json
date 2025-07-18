@@ -12,7 +12,8 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(ls:*)",
-      "Bash(sqlcmd:*)"
+      "Bash(sqlcmd:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
