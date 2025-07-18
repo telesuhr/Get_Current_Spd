@@ -46,4 +46,4 @@ blpapi/
 config.ini
 config.json
 credentials.json
-*.key
+*.keyconfig.jcl.json
